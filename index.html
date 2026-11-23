@@ -119,6 +119,7 @@ function profile(o,ymin,ymax){
 }
 
 function via(v){
+  if(!v||!v.length)return '';
   return v.map((s,i)=>i===0||i===v.length-1?`<b>${h(s)}</b>`:`<span>${h(s)}</span>`).join(' → ');
 }
 
@@ -145,24 +146,24 @@ function card(d,o,i,ymin,ymax){
 function maps(days){
   if(!window.L)return;
   const pin=(m,ll,txt)=>L.marker(ll,{icon:L.divIcon({className:'',html:`<span class="pin">${h(txt)}</span>`,iconSize:[0,0]}),interactive:false}).addTo(m);
-  days.forEach(d=>d.options.forEach((o,i)=>{
+  days.forEach(d=>d.options.forEach((o,i)=>{ if(!o.ll)return;
     const m=L.map(`m-${d.id}-${i}`,{zoomControl:false,attributionControl:false,dragging:!L.Browser.mobile,scrollWheelZoom:false,touchZoom:true,doubleClickZoom:true,tap:false});
     L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:15,subdomains:'abc'}).addTo(m);
-    d.options.forEach((p,j)=>{if(j!==i)L.polyline(p.ll,{color:'#7b878c',weight:2,opacity:.55,interactive:false}).addTo(m)});
+    d.options.forEach((p,j)=>{if(j!==i&&p.ll)L.polyline(p.ll,{color:'#7b878c',weight:2,opacity:.55,interactive:false}).addTo(m)});
     if(o.escape&&o.escape.ll)L.polyline(o.escape.ll,{color:'#1c2326',weight:3,dashArray:'5 6',interactive:false}).addTo(m);
     const line=L.polyline(o.ll,{color:'#fff',weight:7,opacity:.9,interactive:false}).addTo(m);
     L.polyline(o.ll,{color:COL[LV[o.level]],weight:4,interactive:false}).addTo(m);
     const a=o.ll[0],b=o.ll[o.ll.length-1];
     L.circleMarker(a,{radius:6,color:'#fff',weight:2,fillColor:'#1c2326',fillOpacity:1}).addTo(m);
     L.circleMarker(b,{radius:6,color:'#1c2326',weight:2,fillColor:'#fff',fillOpacity:1}).addTo(m);
-    pin(m,a,o.via[0]);
-    const end=o.via[o.via.length-1];
+    pin(m,a,(o.via||[""])[0]);
+    const end=(o.via||[""]).slice(-1)[0];
     if(Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])>0.005)pin(m,b,end);
     m.fitBounds(line.getBounds(),{padding:[22,22]});
   }));
 }
 
-fetch('data.json').then(r=>r.json()).then(days=>{
+fetch('data.json',{cache:'no-cache'}).then(r=>r.json()).then(days=>{
   document.getElementById('nav').innerHTML=days.map(d=>`<a href="#${d.id}"><b>${h({Niedziela:'Nd',Poniedziałek:'Pn',Wtorek:'Wt'}[d.date.split(' ')[0]]||d.date.split(' ')[0])} ${h(d.date.split(' ')[1]||'')}</b><span>${h(d.from)} → ${h(d.to.replace(/ \(.*/,''))}</span></a>`).join('');
   document.getElementById('days').innerHTML=days.map(d=>{
     const all=d.options.flatMap(o=>o.prof.map(p=>p[1]));
