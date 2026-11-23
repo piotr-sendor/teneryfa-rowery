@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="Teneryfa rowerem 2026" xmlns="http://www.topografix.com/GPX/1/1">
-<metadata><name>Poniedziałek 30.11 · Skrót z: Vilaflor</name><desc>Bez pisty: z Vilaflor asfaltem TF-21 prosto do Granadilli.</desc></metadata>
+<metadata><name>Poniedziałek 30.11 · Skrót z: Vilaflor</name><desc>Bez pisty: asfaltem TF-21 z Vilaflor prosto do Granadilli.</desc></metadata>
 <wpt lat="28.156590" lon="-16.636402"><name>Start skrótu: Vilaflor</name></wpt>
 <wpt lat="28.118517" lon="-16.577117"><name>Meta</name></wpt>
-<trk><name>Poniedziałek 30.11 · Skrót z: Vilaflor</name><desc>Bez pisty: z Vilaflor asfaltem TF-21 prosto do Granadilli.</desc><trkseg>
+<trk><name>Poniedziałek 30.11 · Skrót z: Vilaflor</name><desc>Bez pisty: asfaltem TF-21 z Vilaflor prosto do Granadilli.</desc><trkseg>
 <trkpt lat="28.156590" lon="-16.636402"><ele>1385.5</ele></trkpt>
 <trkpt lat="28.156590" lon="-16.636405"><ele>1385.5</ele></trkpt>
 <trkpt lat="28.156642" lon="-16.636427"><ele>1386.2</ele></trkpt>
