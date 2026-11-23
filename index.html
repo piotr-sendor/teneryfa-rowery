@@ -4,11 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Teneryfa rowerem 2026</title>
-<meta name="description" content="Trasy dzień po dniu, opcje dla słabszych i mocnych, pliki GPX do Mapy.com.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-/* Układ: nagłówek + jak otworzyć GPX, pasek dni, potem każdy dzień: opcje 1–3 jako karty z profilem i przyciskiem GPX */
+/* Robocza strona: pasek dni, potem każdy dzień = karty opcji (mapka, trasa przez miejscowości, liczby, profil, GPX) */
 :root{
   --bg:#eef1f2; --card:#ffffff; --fg:#1c2326; --muted:#5b686e; --line:#d3d9dc; --soft:#e4eaec;
   --lava:#c94a22; --pine:#3d7a4c; --sun:#b7791f; --sea:#2d6c8c; --on:#ffffff;
@@ -22,56 +21,46 @@
   --lava:#f0754b; --pine:#71b884; --sun:#e0a64a; --sea:#6db1d3; --on:#11171a; color-scheme:dark}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.5 var(--body)}
-.wrap{max-width:1100px;margin:0 auto;padding-block:max(24px,env(safe-area-inset-top,0px)) 64px;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:36px}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.45 var(--body)}
+.wrap{max-width:1100px;margin:0 auto;padding-block:max(18px,env(safe-area-inset-top,0px)) 48px;
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));display:grid;gap:24px}
 h1,h2,h3{font-family:var(--display);font-weight:700;margin:0;line-height:1.05;text-wrap:balance;letter-spacing:.01em}
-h1{font-size:clamp(2.4rem,7vw,3.6rem)}
-h2{font-size:clamp(1.9rem,5vw,2.5rem)}
-h3{font-size:1.45rem}
+h1{font-size:clamp(2rem,6vw,3rem)}
+h2{font-size:clamp(1.7rem,5vw,2.3rem)}
+h3{font-size:1.35rem}
 p{margin:0}
-a{color:var(--sea)}
 .eyebrow{font:600 .75rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--lava)}
-.lead{color:var(--muted);max-width:66ch}
-header{display:grid;gap:12px}
+header{display:grid;gap:8px}
 
-/* jak otworzyć */
-.howto{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:14px}
-.howto h2{font-size:1.5rem}
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-.steps>div{display:grid;gap:6px;min-width:0}
-.steps b{font:700 1.05rem/1.2 var(--display);letter-spacing:.04em;text-transform:uppercase}
-.steps ol{margin:0;padding-left:1.2em;display:grid;gap:4px}
-.hint{font-size:.92rem;color:var(--muted)}
-
-/* pasek dni */
-nav.days{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;
+nav.days{position:sticky;top:env(safe-area-inset-top,0px);z-index:1000;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;
   background:var(--bg);padding-block:8px;margin-block:-8px}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:1001;background:var(--bg)}
 nav.days a{display:grid;gap:2px;text-decoration:none;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
 nav.days a:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
 nav.days b{font:700 1.1rem/1 var(--display)}
 nav.days span{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* dzień */
-.day{display:grid;gap:16px;scroll-margin-top:84px}
-.dayhead{display:grid;gap:8px}
-.route{font:600 1rem/1.3 var(--mono);color:var(--muted)}
-.route i{font-style:normal;color:var(--lava)}
-.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start}
-.opt{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:12px;min-width:0}
-.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.no{font:700 1.5rem/1 var(--display);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--on);background:var(--c)}
+.day{display:grid;gap:12px;scroll-margin-top:76px}
+.dayhead{display:grid;gap:6px}
+.note{color:var(--muted)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;align-items:start}
+.opt{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:10px;min-width:0}
+.top{display:flex;align-items:center;gap:10px}
+.no{font:700 1.4rem/1 var(--display);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--on);background:var(--c);flex:none}
 .lvl{font:600 .72rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;border-radius:999px;border:1px solid var(--c);color:var(--c)}
-.dots{display:inline-flex;gap:3px;margin-left:auto}
-.dots i{width:9px;height:9px;border-radius:50%;background:var(--soft)}
-.dots i.f{background:var(--c)}
 .opt.l1{--c:var(--pine)} .opt.l2{--c:var(--sun)} .opt.l3{--c:var(--lava)}
-.opt p.d{color:var(--muted);font-size:.97rem}
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;border-block:1px solid var(--line);padding-block:10px}
+.via{font-size:.95rem;line-height:1.4}
+.via b{font-weight:700}
+.via span{color:var(--muted)}
+.map{height:210px;border-radius:8px;border:1px solid var(--line);background:var(--soft);z-index:0}
+.leaflet-container{font:inherit}
+.pin{font:600 11px/1.1 var(--body);color:#1c2326;background:rgba(255,255,255,.93);border:1px solid rgba(0,0,0,.3);border-radius:4px;padding:2px 5px;white-space:nowrap;transform:translate(-50%,-140%);display:inline-block}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;border-block:1px solid var(--line);padding-block:8px}
 .stats div{display:grid;gap:3px;min-width:0}
-.stats b{font:600 1.15rem/1 var(--mono);font-variant-numeric:tabular-nums}
+.stats b{font:600 1.2rem/1 var(--mono);font-variant-numeric:tabular-nums}
 .stats span{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.surf{height:6px;border-radius:3px;background:var(--soft);overflow:hidden;margin-top:3px}
+.surf i{display:block;height:100%;background:var(--c)}
 svg.prof{width:100%;height:auto;display:block}
 .prof .area{fill:var(--c);opacity:.16}
 .prof .ln{fill:none;stroke:var(--c);stroke-width:2;vector-effect:non-scaling-stroke}
@@ -82,66 +71,39 @@ svg.prof{width:100%;height:auto;display:block}
 .btn{display:flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;font:700 1.05rem/1 var(--body);
   padding:14px 16px;border-radius:10px;background:var(--c);color:var(--on);min-height:48px}
 .btn:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
-.btn small{font:500 .78rem/1 var(--mono);opacity:.85}
 .btn svg{width:20px;height:20px;flex:none}
 .esc{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:8px;background:var(--soft)}
 .esc p{font-size:.93rem}
-.esc b{font-weight:700}
 .btn2{display:inline-flex;align-items:center;gap:8px;justify-self:start;text-decoration:none;font:600 .92rem/1 var(--body);
   padding:10px 12px;border-radius:8px;border:1px solid var(--fg);color:var(--fg);min-height:40px}
 .btn2:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
 .btn2 svg{width:16px;height:16px}
-.meet{font-size:.93rem;color:var(--muted)}
-footer{font-size:.85rem;color:var(--muted);display:grid;gap:6px;max-width:80ch}
-@media (max-width:420px){.stats b{font-size:1rem}}
-@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+footer{font-size:.82rem;color:var(--muted)}
 html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <p class="eyebrow">Kazuaria jesienne · 29.11–1.12.2026</p>
+    <p class="eyebrow">29.11–1.12.2026</p>
     <h1>Teneryfa rowerem</h1>
-    <p class="lead">Trzy dni rowerowe, każdy z kilkoma opcjami. Wszystkie opcje danego dnia startują z tego samego miejsca i kończą się w tym samym noclegu, więc każdy jedzie swoim tempem, a wieczorem widzimy się razem. Przy trudniejszych opcjach jest punkt zjazdu: jeśli w trakcie jest źle, przechodzisz na łatwiejszą trasę.</p>
   </header>
-
-  <section class="howto" aria-labelledby="howto-h">
-    <h2 id="howto-h">Jak otworzyć trasę w Mapy.com</h2>
-    <div class="steps">
-      <div><b>iPhone</b>
-        <ol><li>Kliknij zielony, żółty albo czerwony przycisk <em>Pobierz GPX</em>.</li>
-          <li>Safari zapyta o pobranie: <em>Pobierz</em>, potem otwórz plik (ikona strzałki u góry).</li>
-          <li>Udostępnij → <em>Mapy.com</em>. Trasa pojawi się na mapie.</li></ol></div>
-      <div><b>Android</b>
-        <ol><li>Kliknij przycisk <em>Pobierz GPX</em>.</li>
-          <li>Otwórz pobrany plik z powiadomienia albo z Pobranych.</li>
-          <li>Wybierz <em>Otwórz w Mapy.com</em>.</li></ol></div>
-      <div><b>Zanim wyjedziesz</b>
-        <ol><li>Zaloguj się w Mapy.com: bez konta import nie działa.</li>
-          <li>Zapisz trasę do <em>Moje Mapy</em>, żeby została w telefonie.</li>
-          <li>Pobierz mapę Teneryfy offline, w górach zasięg bywa słaby.</li></ol></div>
-    </div>
-    <p class="hint">Plik GPX otworzy też Komoot, Garmin Connect, Strava i każda inna apka do nawigacji.</p>
-  </section>
-
   <nav class="days" id="nav" aria-label="Dni"></nav>
-  <main id="days" style="display:grid;gap:48px"></main>
-
-  <footer>
-    <p>Czasy jazdy to szacunek dla słabszych / mocnych, bez postojów. Przewyższenia i szuter policzone z tras BRouter (profil gravel i fastbike) na danych OpenStreetMap i SRTM.</p>
-    <p>Woda i jedzenie: Arona, San Miguel, Vilaflor, Ifonche (El Dornajo), Granadilla. Na pistach nad Vilaflor nie ma nic. Teide rano blisko zera: kurtka i długie rękawiczki.</p>
-  </footer>
+  <main id="days" style="display:grid;gap:40px"></main>
+  <footer>Mapa © OpenStreetMap, OpenTopoMap. Trasy i przewyższenia: BRouter.</footer>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 const DL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 20h16"/></svg>';
 const LV={"łatwa":1,"średnia":2,"mocna":3};
+const COL={1:'#3d7a4c',2:'#b7791f',3:'#c94a22'};
 const fmt=n=>String(n).replace('.',',');
 const h=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function profile(o,ymin,ymax){
-  const W=380,H=120,L=36,R=6,T=8,B=20,pw=W-L-R,ph=H-T-B;
+  const W=380,H=110,L=36,R=6,T=8,B=20,pw=W-L-R,ph=H-T-B;
   const km=o.prof[o.prof.length-1][0];
   const x=k=>L+k/km*pw, y=e=>T+ph-(e-ymin)/(ymax-ymin)*ph;
   const pts=o.prof.map(p=>x(p[0]).toFixed(1)+','+y(p[1]).toFixed(1)).join(' ');
@@ -149,47 +111,68 @@ function profile(o,ymin,ymax){
   const step=ymax-ymin>1200?500:ymax-ymin>500?250:100;
   for(let e=Math.ceil(ymin/step)*step;e<=ymax;e+=step){g+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${y(e)}" y2="${y(e)}"/><text x="${L-5}" y="${y(e)+4}" text-anchor="end">${e}</text>`}
   const ks=km>50?25:km>20?10:5;
-  for(let k=0;k<=km;k+=ks){g+=`<text x="${x(k)}" y="${H-6}" text-anchor="${k===0?'start':'middle'}">${k} km</text>`}
+  for(let k=0;k<=km;k+=ks){g+=`<text x="${x(k)}" y="${H-5}" text-anchor="${k===0?'start':'middle'}">${k} km</text>`}
   let mk='';
-  if(o.escape&&o.escape.km_at!=null){const X=x(o.escape.km_at);
-    mk=`<line class="mk" x1="${X}" x2="${X}" y1="${T}" y2="${T+ph}"/><text class="mkt" x="${X+(X>W*0.7?-5:5)}" y="${T+12}" text-anchor="${X>W*0.7?'end':'start'}">zjazd: ${h(o.escape.at)}</text>`}
-  return `<svg class="prof" viewBox="0 0 ${W} ${H}" role="img" aria-label="Profil wysokości: od ${o.emin} do ${o.emax} m n.p.m. na ${fmt(o.km)} km">${g}<polygon class="area" points="${x(0)},${T+ph} ${pts} ${x(km)},${T+ph}"/><polyline class="ln" points="${pts}"/>${mk}</svg>`;
+  if(o.escape&&o.escape.km_at!=null){const X=x(o.escape.km_at),r=X>W*0.7;
+    mk=`<line class="mk" x1="${X}" x2="${X}" y1="${T}" y2="${T+ph}"/><text class="mkt" x="${X+(r?-5:5)}" y="${T+11}" text-anchor="${r?'end':'start'}">zjazd: ${h(o.escape.at)}</text>`}
+  return `<svg class="prof" viewBox="0 0 ${W} ${H}" role="img" aria-label="Profil: ${o.emin}–${o.emax} m n.p.m.">${g}<polygon class="area" points="${x(0)},${T+ph} ${pts} ${x(km)},${T+ph}"/><polyline class="ln" points="${pts}"/>${mk}</svg>`;
 }
 
-function card(o,ymin,ymax){
+function via(v){
+  return v.map((s,i)=>i===0||i===v.length-1?`<b>${h(s)}</b>`:`<span>${h(s)}</span>`).join(' → ');
+}
+
+function card(d,o,i,ymin,ymax){
   const n=LV[o.level];
-  const dots=[1,2,3].map(i=>`<i class="${i<=n?'f':''}"></i>`).join('');
   let esc='';
-  if(o.escape){
-    const e=o.escape;
-    esc=`<div class="esc"><p><b>Punkt zjazdu${e.km_at!=null?` (km ${fmt(e.km_at)})`:''}:</b> ${h(e.text)}</p>${e.file?`<a class="btn2" href="gpx/${e.file}" download>${DL}Skrót GPX · ${fmt(e.km)} km, +${e.up} m</a>`:''}</div>`;
-  }
+  if(o.escape){const e=o.escape;
+    esc=`<div class="esc"><p><b>Zjazd${e.km_at!=null?` (km ${fmt(e.km_at)})`:''}:</b> ${h(e.text.replace(/^Jeśli jest źle: /,''))}</p>${e.file?`<a class="btn2" href="gpx/${e.file}" download>${DL}Skrót GPX · ${fmt(e.km)} km, +${e.up} m</a>`:''}</div>`}
   return `<article class="opt l${n}">
-    <div class="top"><span class="no">${o.n}</span><span class="lvl">${o.level}</span><span class="dots" aria-label="trudność ${n} z 3">${dots}</span></div>
-    <h3>${h(o.title)}</h3>
-    <p class="d">${h(o.desc)}</p>
+    <div class="top"><span class="no">${o.n}</span><h3>${h(o.title)}</h3></div>
+    <p class="via">${via(o.via)}</p>
+    <div class="map" id="m-${d.id}-${i}" aria-label="Mapa trasy"></div>
     <div class="stats">
       <div><b>${fmt(o.km)}</b><span>km</span></div>
       <div><b>+${o.up}</b><span>m w górę</span></div>
-      <div><b>${o.unp}%</b><span>szuter</span></div>
-      <div><b>${fmt(o.tw)}/${fmt(o.ts)}</b><span>h jazdy</span></div>
+      <div><b>${o.unp}%</b><span>szuter</span><div class="surf"><i style="width:${o.unp}%"></i></div></div>
     </div>
     ${profile(o,ymin,ymax)}
-    <a class="btn" href="gpx/${o.file}" download>${DL}Pobierz GPX <small>opcja ${o.n}</small></a>
+    <a class="btn" href="gpx/${o.file}" download>${DL}GPX opcja ${o.n}</a>
     ${esc}
   </article>`;
 }
 
+function maps(days){
+  if(!window.L)return;
+  const pin=(m,ll,txt)=>L.marker(ll,{icon:L.divIcon({className:'',html:`<span class="pin">${h(txt)}</span>`,iconSize:[0,0]}),interactive:false}).addTo(m);
+  days.forEach(d=>d.options.forEach((o,i)=>{
+    const m=L.map(`m-${d.id}-${i}`,{zoomControl:false,attributionControl:false,dragging:!L.Browser.mobile,scrollWheelZoom:false,touchZoom:true,doubleClickZoom:true,tap:false});
+    L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:15,subdomains:'abc'}).addTo(m);
+    d.options.forEach((p,j)=>{if(j!==i)L.polyline(p.ll,{color:'#7b878c',weight:2,opacity:.55,interactive:false}).addTo(m)});
+    if(o.escape&&o.escape.ll)L.polyline(o.escape.ll,{color:'#1c2326',weight:3,dashArray:'5 6',interactive:false}).addTo(m);
+    const line=L.polyline(o.ll,{color:'#fff',weight:7,opacity:.9,interactive:false}).addTo(m);
+    L.polyline(o.ll,{color:COL[LV[o.level]],weight:4,interactive:false}).addTo(m);
+    const a=o.ll[0],b=o.ll[o.ll.length-1];
+    L.circleMarker(a,{radius:6,color:'#fff',weight:2,fillColor:'#1c2326',fillOpacity:1}).addTo(m);
+    L.circleMarker(b,{radius:6,color:'#1c2326',weight:2,fillColor:'#fff',fillOpacity:1}).addTo(m);
+    pin(m,a,o.via[0]);
+    const end=o.via[o.via.length-1];
+    if(Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])>0.005)pin(m,b,end);
+    m.fitBounds(line.getBounds(),{padding:[22,22]});
+  }));
+}
+
 fetch('data.json').then(r=>r.json()).then(days=>{
-  document.getElementById('nav').innerHTML=days.map(d=>`<a href="#${d.id}"><b>${h(d.date.split(' ')[0])}</b><span>${h(d.from)} → ${h(d.to.replace(/ \(.*/,''))}</span></a>`).join('');
+  document.getElementById('nav').innerHTML=days.map(d=>`<a href="#${d.id}"><b>${h({Niedziela:'Nd',Poniedziałek:'Pn',Wtorek:'Wt'}[d.date.split(' ')[0]]||d.date.split(' ')[0])} ${h(d.date.split(' ')[1]||'')}</b><span>${h(d.from)} → ${h(d.to.replace(/ \(.*/,''))}</span></a>`).join('');
   document.getElementById('days').innerHTML=days.map(d=>{
     const all=d.options.flatMap(o=>o.prof.map(p=>p[1]));
     const ymin=Math.max(0,Math.floor(Math.min(...all)/100)*100), ymax=Math.ceil(Math.max(...all)/100)*100;
     return `<section class="day" id="${d.id}">
       <div class="dayhead"><p class="eyebrow">${h(d.date)}</p><h2>${h(d.from)} → ${h(d.to)}</h2>
-      <p class="route">Nocleg dla wszystkich: <i>${h(d.to)}</i></p><p class="lead">${h(d.lead)}</p></div>
-      <div class="opts">${d.options.map(o=>card(o,ymin,ymax)).join('')}</div></section>`;
+      <p class="note">${h(d.lead)}</p></div>
+      <div class="opts">${d.options.map((o,i)=>card(d,o,i,ymin,ymax)).join('')}</div></section>`;
   }).join('');
+  maps(days);
   if(location.hash){const t=document.getElementById(location.hash.slice(1));if(t)t.scrollIntoView()}
 }).catch(()=>{document.getElementById('days').innerHTML='<p>Nie udało się wczytać tras. Odśwież stronę.</p>'});
 </script>
