@@ -54,6 +54,7 @@ nav.days span{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hid
 .via span{color:var(--muted)}
 .map{height:210px;border-radius:8px;border:1px solid var(--line);background:var(--soft);z-index:0}
 .leaflet-container{font:inherit}
+.leaflet-control-zoom a{color:#1c2326}
 .pin{font:600 11px/1.1 var(--body);color:#1c2326;background:rgba(255,255,255,.93);border:1px solid rgba(0,0,0,.3);border-radius:4px;padding:2px 5px;white-space:nowrap;transform:translate(-50%,-140%);display:inline-block}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;border-block:1px solid var(--line);padding-block:8px}
 .stats div{display:grid;gap:3px;min-width:0}
@@ -147,7 +148,10 @@ function maps(days){
   if(!window.L)return;
   const pin=(m,ll,txt)=>L.marker(ll,{icon:L.divIcon({className:'',html:`<span class="pin">${h(txt)}</span>`,iconSize:[0,0]}),interactive:false}).addTo(m);
   days.forEach(d=>d.options.forEach((o,i)=>{ if(!o.ll)return;
-    const m=L.map(`m-${d.id}-${i}`,{zoomControl:false,attributionControl:false,dragging:!L.Browser.mobile,scrollWheelZoom:false,touchZoom:true,doubleClickZoom:true,tap:false});
+    const m=L.map(`m-${d.id}-${i}`,{zoomControl:true,attributionControl:false,dragging:!L.Browser.mobile,scrollWheelZoom:false,touchZoom:true,doubleClickZoom:true,tap:false});
+    // kółko myszy i przeciąganie jednym palcem dopiero po kliknięciu w mapkę, żeby nie łapać przewijania strony
+    m.on('click',()=>{m.scrollWheelZoom.enable();m.dragging.enable()});
+    m.getContainer().addEventListener('mouseleave',()=>m.scrollWheelZoom.disable());
     L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:15,subdomains:'abc'}).addTo(m);
     d.options.forEach((p,j)=>{if(j!==i&&p.ll)L.polyline(p.ll,{color:'#7b878c',weight:2,opacity:.55,interactive:false}).addTo(m)});
     if(o.escape&&o.escape.ll)L.polyline(o.escape.ll,{color:'#1c2326',weight:3,dashArray:'5 6',interactive:false}).addTo(m);
