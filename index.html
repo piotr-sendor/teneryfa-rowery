@@ -89,6 +89,9 @@ footer{font-size:.82rem;color:var(--muted)}
 .map.big{height:min(52vh,420px)}
 .legend{display:grid;gap:4px;font-size:.9rem}
 .legend i{display:inline-block;width:22px;height:4px;border-radius:2px;vertical-align:middle;margin-right:8px}
+.planb{border:1px solid var(--line);border-left:4px solid var(--sun);border-radius:8px;background:var(--card);padding:10px 12px;display:grid;gap:6px;max-width:80ch}
+.planb b{font:700 .8rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--sun)}
+.planb ul{margin:0;padding-left:1.1em;display:grid;gap:4px;font-size:.95rem}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
@@ -216,7 +219,7 @@ function render(key){
     const ymin=Math.max(0,Math.floor(Math.min(...all)/100)*100), ymax=Math.ceil(Math.max(...all)/100)*100;
     return `<section class="day" id="${d.id}">
       <div class="dayhead"><p class="eyebrow">${h(d.date)}</p><h2>${h(d.from)} → ${h(d.to)}</h2>
-      <p class="note">${h(d.lead)}</p></div>
+      <p class="note">${h(d.lead)}</p>${d.plan_b?`<div class="planb"><b>Plan B dla słabszych</b><ul>${d.plan_b.map(x=>`<li>${h(x)}</li>`).join("")}</ul></div>`:""}</div>
       <div class="opts">${d.options.map((o,i)=>card(d,o,i,ymin,ymax)).join('')}</div></section>`;
   }).join('');
   maps(days);
