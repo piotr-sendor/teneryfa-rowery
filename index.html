@@ -80,6 +80,15 @@ svg.prof{width:100%;height:auto;display:block}
 .btn2:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
 .btn2 svg{width:16px;height:16px}
 footer{font-size:.82rem;color:var(--muted)}
+.plan{display:grid;gap:10px}
+.plans{display:flex;gap:6px;flex-wrap:wrap}
+.plans:empty{display:none}
+.plans button{font:700 1rem/1 var(--body);padding:12px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer;min-height:44px}
+.plans button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.plans button:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
+.map.big{height:min(52vh,420px)}
+.legend{display:grid;gap:4px;font-size:.9rem}
+.legend i{display:inline-block;width:22px;height:4px;border-radius:2px;vertical-align:middle;margin-right:8px}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
@@ -90,6 +99,11 @@ html{scroll-behavior:smooth}
     <p class="eyebrow">29.11–1.12.2026</p>
     <h1>Teneryfa rowerem</h1>
   </header>
+  <section class="plan" aria-label="Wariant drugiej nocy">
+    <div class="plans" id="plans"></div>
+    <div class="map big" id="overview" aria-label="Mapa całego wyjazdu"></div>
+    <div class="legend" id="legend"></div>
+  </section>
   <nav class="days" id="nav" aria-label="Dni"></nav>
   <main id="days" style="display:grid;gap:40px"></main>
   <footer>Mapa © OpenStreetMap, OpenTopoMap. Trasy i przewyższenia: BRouter.</footer>
@@ -167,7 +181,35 @@ function maps(days){
   }));
 }
 
-fetch('data.json',{cache:'no-cache'}).then(r=>r.json()).then(days=>{
+const DAYCOL={d1:'#c94a22',d2:'#2d6c8c',d3:'#3d7a4c'};
+let overview=null;
+function overviewMap(days){
+  if(!window.L)return;
+  if(overview){overview.remove();overview=null}
+  const m=overview=L.map('overview',{zoomControl:true,attributionControl:false,dragging:!L.Browser.mobile,scrollWheelZoom:false,tap:false});
+  m.on('click',()=>{m.scrollWheelZoom.enable();m.dragging.enable()});
+  m.getContainer().addEventListener('mouseleave',()=>m.scrollWheelZoom.disable());
+  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:15,subdomains:'abc'}).addTo(m);
+  const all=[];
+  days.forEach(d=>[...d.options.keys()].reverse().forEach(i=>{const o=d.options[i];
+    L.polyline(o.ll,{color:'#fff',weight:i?4:7,opacity:.85,interactive:false}).addTo(m);
+    const pl=L.polyline(o.ll,{color:DAYCOL[d.id],weight:i?2:4,opacity:i?.7:1,dashArray:i?'4 6':null,interactive:false}).addTo(m);
+    all.push(pl);
+  }));
+  const pin=(ll,txt)=>L.marker(ll,{icon:L.divIcon({className:'',html:`<span class="pin">${h(txt)}</span>`,iconSize:[0,0]}),interactive:false}).addTo(m);
+  const o0=days[0].options[0];pin(o0.ll[0],'Start/meta: Casa Natalia');
+  days.slice(0,-1).forEach((d,k)=>{const ll=d.options[0].ll.slice(-1)[0];L.circleMarker(ll,{radius:6,color:'#fff',weight:2,fillColor:'#1c2326',fillOpacity:1}).addTo(m);pin(ll,`Noc ${k+1}: ${d.to.replace(/ \(.*/,'')}`)});
+  m.fitBounds(L.featureGroup(all).getBounds(),{padding:[18,18]});
+}
+
+let PLANS=null;
+function render(key){
+  const pl=PLANS[key]; if(!pl)return;
+  try{localStorage.setItem('plan',key)}catch(e){}
+  document.querySelectorAll('#plans button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===key));
+  const days=pl.days;
+  const leg=days.map(d=>{const o=d.options[0];return `<span><i style="background:${DAYCOL[d.id]}"></i>${h({Niedziela:'Nd',Poniedziałek:'Pn',Wtorek:'Wt'}[d.date.split(' ')[0]]||'')}: ${h(d.from)} → ${h(d.to.replace(/ \(.*/,''))} · ${fmt(o.km)} km, +${o.up} m, szuter ${o.unp}%</span>`}).join('');
+  document.getElementById('legend').innerHTML=leg;
   document.getElementById('nav').innerHTML=days.map(d=>`<a href="#${d.id}"><b>${h({Niedziela:'Nd',Poniedziałek:'Pn',Wtorek:'Wt'}[d.date.split(' ')[0]]||d.date.split(' ')[0])} ${h(d.date.split(' ')[1]||'')}</b><span>${h(d.from)} → ${h(d.to.replace(/ \(.*/,''))}</span></a>`).join('');
   document.getElementById('days').innerHTML=days.map(d=>{
     const all=d.options.flatMap(o=>o.prof.map(p=>p[1]));
@@ -178,6 +220,18 @@ fetch('data.json',{cache:'no-cache'}).then(r=>r.json()).then(days=>{
       <div class="opts">${d.options.map((o,i)=>card(d,o,i,ymin,ymax)).join('')}</div></section>`;
   }).join('');
   maps(days);
+  overviewMap(days);
+}
+
+fetch('data.json',{cache:'no-cache'}).then(r=>r.json()).then(data=>{
+  PLANS=Array.isArray(data)?{plan:{name:'Plan',short:'Plan',days:data}}:data;
+  const keys=Object.keys(PLANS);
+  document.getElementById('plans').innerHTML=keys.length>1?keys.map(k=>`<button type="button" data-k="${k}" aria-pressed="false">${h(PLANS[k].short)}</button>`).join(''):'';
+  document.querySelectorAll('#plans button').forEach(b=>b.addEventListener('click',()=>render(b.dataset.k)));
+  let start=new URLSearchParams(location.search).get('wariant');
+  if(!PLANS[start]){try{start=localStorage.getItem('plan')}catch(e){}}
+  if(!PLANS[start])start=keys[0];
+  render(start);
   if(location.hash){const t=document.getElementById(location.hash.slice(1));if(t)t.scrollIntoView()}
 }).catch(()=>{document.getElementById('days').innerHTML='<p>Nie udało się wczytać tras. Odśwież stronę.</p>'});
 </script>
