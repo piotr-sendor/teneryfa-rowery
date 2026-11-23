@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="Teneryfa rowerem 2026" xmlns="http://www.topografix.com/GPX/1/1">
-<metadata><name>Wtorek 1.12 · Opcja 2 · Pisty przez La Escalona i Ifonche</name><desc>Leśne pisty, obiad w El Dornajo w Ifonche, na koniec szutry nad Adeje. Główna trasa dnia.</desc></metadata>
+<metadata><name>Wtorek 1.12 · Opcja 1 · Pisty przez La Escalona i Ifonche</name><desc>Leśne pisty, obiad w El Dornajo w Ifonche, na koniec szutry nad Adeje.</desc></metadata>
 <wpt lat="28.156590" lon="-16.636400"><name>Start: Vilaflor</name></wpt>
-<wpt lat="28.146998" lon="-16.679976"><name>Ifonche: El Dornajo, punkt zjazdu</name></wpt>
+<wpt lat="28.146998" lon="-16.679976"><name>Ifonche: El Dornajo</name></wpt>
 <wpt lat="28.128870" lon="-16.756070"><name>Meta: Casa Natalia</name></wpt>
-<trk><name>Wtorek 1.12 · Opcja 2 · Pisty przez La Escalona i Ifonche</name><desc>Leśne pisty, obiad w El Dornajo w Ifonche, na koniec szutry nad Adeje. Główna trasa dnia.</desc><trkseg>
+<trk><name>Wtorek 1.12 · Opcja 1 · Pisty przez La Escalona i Ifonche</name><desc>Leśne pisty, obiad w El Dornajo w Ifonche, na koniec szutry nad Adeje.</desc><trkseg>
 <trkpt lat="28.156590" lon="-16.636405"><ele>1385.5</ele></trkpt>
 <trkpt lat="28.156642" lon="-16.636427"><ele>1386.2</ele></trkpt>
 <trkpt lat="28.156737" lon="-16.636505"><ele>1385.2</ele></trkpt>
