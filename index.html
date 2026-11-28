@@ -202,6 +202,10 @@ function overviewMap(days){
   const pin=(ll,txt)=>L.marker(ll,{icon:L.divIcon({className:'',html:`<span class="pin">${h(txt)}</span>`,iconSize:[0,0]}),interactive:false}).addTo(m);
   const o0=days[0].options[0];pin(o0.ll[0],'Start/meta: Casa Natalia');
   days.slice(0,-1).forEach((d,k)=>{const ll=d.options[0].ll.slice(-1)[0];L.circleMarker(ll,{radius:6,color:'#fff',weight:2,fillColor:'#1c2326',fillOpacity:1}).addTo(m);pin(ll,`Noc ${k+1}: ${d.to.replace(/ \(.*/,'')}`)});
+  const cg=[28.1114,-16.5932];
+  L.circleMarker(cg,{radius:8,color:'#fff',weight:2,fillColor:'#e8590c',fillOpacity:1}).addTo(m)
+    .bindPopup('<b>Casa Giuliana</b>, Charco del Pino (Granadilla)<br>propozycja Łozbisza: nocleg 30.11 w wariantach 2 i 3<br><a href="https://www.booking.com/Share-BTd3qys" target="_blank">Booking</a>');
+  L.marker(cg,{icon:L.divIcon({className:'',html:'<span class="pin" style="background:#e8590c;color:#fff">Casa Giuliana (propozycja)</span>',iconSize:[0,0]}),interactive:false}).addTo(m);
   m.fitBounds(L.featureGroup(all).getBounds(),{padding:[18,18]});
 }
 
